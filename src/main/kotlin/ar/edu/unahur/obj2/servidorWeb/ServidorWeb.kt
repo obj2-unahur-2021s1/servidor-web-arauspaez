@@ -20,8 +20,7 @@ class URL(val protocolo: String,val ruta: String,val extension: String)
 
 class ServidorWeb{
   private var modulos = mutableListOf<Modulo>()
-
-  var demoraMinima by Delegates.notNull<Int>() //(en milisegundos)
+  var demoraMinima: Int? = null //(en milisegundos)
   /*Una respuesta cuyo tiempo de respuesta supere la demora mínima se considera demorada*/
 
   fun recibirPedido(nuevoPedido: Pedido): Respuesta{
@@ -36,7 +35,7 @@ class ServidorWeb{
   }
   private fun moduloSegunPedido(nuevoPedido: Pedido) = modulos.find { it.puedeResponder(nuevoPedido) }
 
-  var analizadores by Delegates.notNull<Analizador>()
+  var analizadores: Analizador? = null
 }
 
 

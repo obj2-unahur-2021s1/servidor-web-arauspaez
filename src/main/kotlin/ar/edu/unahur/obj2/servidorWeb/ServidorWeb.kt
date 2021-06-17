@@ -11,15 +11,16 @@ enum class CodigoHttp(val codigo: Int) {
   NOT_FOUND(404),
 }
 
-class Pedido(val ip: String, val url: URL /*cambiar por tipo URL?*/, val fechaHora: LocalDateTime)
+class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime) {
+  val protocolo = url.takeWhile { it.isLetter() }
+  val ruta = "/" + url.split("://").last().substringAfter("/")
+  val extension = url.takeLastWhile { it.isLetter() }
+}
 
 class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido)
 
-class URL(val protocolo: String,val ruta: String,val extension: String)
-
-
 class ServidorWeb{
-  private var modulos = mutableListOf<Modulo>()
+  var modulos = mutableListOf<Modulo>()
   var demoraMinima: Int? = null //(en milisegundos)
   /*Una respuesta cuyo tiempo de respuesta supere la demora mínima se considera demorada*/
 
@@ -28,14 +29,14 @@ class ServidorWeb{
       val completaRespuesta = Respuesta(CodigoHttp.OK,moduloSegunPedido(nuevoPedido)!!.body,moduloSegunPedido(nuevoPedido)!!.tiempoRespuesta,nuevoPedido)
       return completaRespuesta
     }else{
-      val completaRespuesta = Respuesta(CodigoHttp.NOT_FOUND,"",10,nuevoPedido)
+      val completaRespuesta = Respuesta(CodigoHttp.NOT_IMPLEMENTED,"",10,nuevoPedido)
       return completaRespuesta
     }
     //agregar la complejidad para analizadores (**)
   }
   private fun moduloSegunPedido(nuevoPedido: Pedido) = modulos.find { it.puedeResponder(nuevoPedido) }
 
-  var analizadores: Analizador? = null
+  var analizadores = mutableListOf<Analizador>()
 }
 
 
@@ -45,7 +46,7 @@ abstract class Modulo(){
   abstract var tiempoRespuesta: Int //"Un numero, tambien fijo"
   //abstract fun cantidadDeRespuestasDemoradas()?
 
-  fun puedeResponder(pedido: Pedido) = pedido.url.protocolo == "HTTP" && this.extensiones.contains(pedido.url.extension)
+  fun puedeResponder(pedido: Pedido) = pedido.protocolo == "HTTP" && this.extensiones.contains(pedido.extension) //arreglar para usar con String
   //el pedido tiene que tener el protocolo "HTTP" y cumplir con alguna de las extensiones permitidas.
 }
 

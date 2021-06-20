@@ -22,7 +22,6 @@ open class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, 
 object ServidorWeb{
     var modulos = mutableListOf<Modulo>()
     var demoraMinima: Int? = null //(en milisegundos)
-    /*Una respuesta cuyo tiempo de respuesta supere la demora mínima se considera demorada*/
     //val pedidos = mutableListOf<Pedido>()
 
     fun validacionProtocolo(pedido: Pedido) =
@@ -30,12 +29,12 @@ object ServidorWeb{
         else CodigoHttp.NOT_IMPLEMENTED
 
     fun recibirPedidoModulo(pedido: Pedido): Respuesta {
-        if (this.validacionProtocolo(pedido) == CodigoHttp.NOT_IMPLEMENTED) {
+        if (validacionProtocolo(pedido) == CodigoHttp.NOT_IMPLEMENTED) {
             val RespuestaNOT_IMPLEMENTED = Respuesta(CodigoHttp.NOT_IMPLEMENTED, "", 10, pedido)
             return RespuestaNOT_IMPLEMENTED
         }
         else {
-            val modulo = this.moduloSegunPedido(pedido)
+            val modulo = moduloSegunPedido(pedido)
 
             if (modulo != null){
                 val RespuestaOK = Respuesta(CodigoHttp.OK, modulo.body, modulo.tiempoRespuesta, pedido)
@@ -51,6 +50,10 @@ object ServidorWeb{
     private fun moduloSegunPedido(nuevoPedido: Pedido) =  modulos.find { it.puedeResponder(nuevoPedido) }
 
     var analizadores = mutableListOf<Analizador>()
+
+    //Idea:
+    //fun enviarRespuestaAAnalizar(moduloAsignado: Modulo,respuestaAAnalizar: Respuesta) =
+    //    analizadores.forEach(recibirRespuesta(moduloAsignado,respuestaAAnalizar))
 }
 
 

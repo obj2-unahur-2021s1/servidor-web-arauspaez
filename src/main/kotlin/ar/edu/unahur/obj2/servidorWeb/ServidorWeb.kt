@@ -21,7 +21,6 @@ open class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, 
 
 object ServidorWeb{
     var modulos = mutableListOf<Modulo>()
-    var demoraMinima: Int? = null //(en milisegundos)
     //val pedidos = mutableListOf<Pedido>()
 
     fun validacionProtocolo(pedido: Pedido) =
@@ -47,13 +46,10 @@ object ServidorWeb{
         }
     }
 
-    private fun moduloSegunPedido(nuevoPedido: Pedido) =  modulos.find { it.puedeResponder(nuevoPedido) }
+    fun moduloSegunPedido(pedido: Pedido) =  modulos.find { it.puedeResponder(pedido) }
 
     var analizadores = mutableListOf<Analizador>()
 
     //Idea:
-    //fun enviarRespuestaAAnalizar(moduloAsignado: Modulo,respuestaAAnalizar: Respuesta) =
-    //    analizadores.forEach(recibirRespuesta(moduloAsignado,respuestaAAnalizar))
+    fun enviarRespuestaAAnalizar(pedido: Pedido) { analizadores.forEach { it.recibirRespuesta(pedido) } }
 }
-
-

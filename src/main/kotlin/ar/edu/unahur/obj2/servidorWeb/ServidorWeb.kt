@@ -17,7 +17,10 @@ class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime) {
     val extension = url.takeLastWhile { it.isLetter() }
 }
 
-open class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido)
+open class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido){
+    fun respuestaDemorada(demoraMinima: Int) = tiempo > demoraMinima
+    fun compararIP(ip: String) = pedido.ip == ip
+}
 
 object ServidorWeb{
     var modulos = mutableListOf<Modulo>()
@@ -27,7 +30,7 @@ object ServidorWeb{
         if (pedido.protocolo == "http") CodigoHttp.OK
         else CodigoHttp.NOT_IMPLEMENTED
 
-    fun recibirPedidoModulo(pedido: Pedido): Respuesta {
+    fun darRespuesta(pedido: Pedido): Respuesta {
         if (validacionProtocolo(pedido) == CodigoHttp.NOT_IMPLEMENTED) {
             val RespuestaNOT_IMPLEMENTED = Respuesta(CodigoHttp.NOT_IMPLEMENTED, "", 10, pedido)
             return RespuestaNOT_IMPLEMENTED
@@ -35,21 +38,32 @@ object ServidorWeb{
         else {
             val modulo = moduloSegunPedido(pedido)
 
-            if (modulo != null){
+            if (modulo != ModuloSinExtensiones){
                 val RespuestaOK = Respuesta(CodigoHttp.OK, modulo.body, modulo.tiempoRespuesta, pedido)
                 return RespuestaOK
             }
             else{
                 val RespuestaNOT_FOUND = Respuesta(CodigoHttp.NOT_FOUND, "", 10, pedido)
                 return RespuestaNOT_FOUND
+                //Para ModuloSinExtensiones
             }
         }
     }
 
-    fun moduloSegunPedido(pedido: Pedido) =  modulos.find { it.puedeResponder(pedido) }
-
+    fun moduloSegunPedido(pedido: Pedido) : Modulo {
+        var moduloElegido = modulos.find { it.puedeResponder(pedido) }
+        if (validacionProtocolo(pedido) == CodigoHttp.NOT_IMPLEMENTED){
+            moduloElegido = ModuloSinProtocolo
+        }
+        else if(moduloElegido == null) {
+            moduloElegido = ModuloSinExtensiones
+        }
+        return moduloElegido
+    }
+    //Analizadores
     var analizadores = mutableListOf<Analizador>()
 
     //Idea:
     fun enviarRespuestaAAnalizar(pedido: Pedido) { analizadores.forEach { it.recibirRespuesta(pedido) } }
 }
+

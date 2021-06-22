@@ -33,3 +33,7 @@ class ModuloTexto() : Modulo() {
 class ModuloVideo() : Modulo() {
     override var extensiones = mutableListOf<Extensiones>(Extensiones.MP4)
 }
+
+object ModuloSinExtensiones: Modulo()
+
+object ModuloSinProtocolo: Modulo()

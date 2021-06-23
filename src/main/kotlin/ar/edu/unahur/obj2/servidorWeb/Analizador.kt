@@ -14,6 +14,7 @@ abstract class Analizador {
             modulosRespuesta[moduloPedido]?.add(ServidorWeb.darRespuesta(pedido))
         }
     }
+    fun cantidadRespuestas() = modulosRespuesta.values.size
 }
 
 class AnalizadorDemoras(val demoraMinima: Int) : Analizador(){
@@ -22,7 +23,7 @@ class AnalizadorDemoras(val demoraMinima: Int) : Analizador(){
 
 class AnalizadorIPSospechosa : Analizador() {
     //se debe poder consultar cuántos pedidos realizó una cierta IP sospechosa
-    val IPsSospechosas = mutableSetOf<String>()
+    var IPsSospechosas = mutableSetOf<String>()
 
     //cuántos pedidos realizó una cierta IP sospechosa
     fun contarPedidosEnUnModulo(IP: String,modulo: Modulo) =
@@ -67,7 +68,6 @@ class AnalizadorIPSospechosa : Analizador() {
 }
 
 class AnalizadorEstadisticas : Analizador(){
-    fun cantidadRespuestas() = modulosRespuesta.values.size
     fun tiempoRespuestasModulo(modulo: Modulo) = modulosRespuesta[modulo]!!.sumBy { it.tiempo }
     fun tiempoRespuestasTodosLosModulos() = modulosRespuesta.keys.sumBy { this.tiempoRespuestasModulo(it) }
     fun tiempoDeRespuestaPromedio() = tiempoRespuestasTodosLosModulos() / cantidadRespuestas()

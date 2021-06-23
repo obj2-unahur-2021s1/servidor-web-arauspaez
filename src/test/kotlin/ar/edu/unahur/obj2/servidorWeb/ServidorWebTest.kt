@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeSameInstanceAs
 import java.time.LocalDate
 
 
@@ -59,7 +58,7 @@ class ServidorWebTest : DescribeSpec({
     it("Modulo Imagen"){
       ModuloImagen.puedeResponder(pedidoConModuloOK).shouldBeTrue()
     }
-    it("Modulo Video"){
+    it("No responde al Modulo Video"){
       ModuloVideo.puedeResponder(pedidoConModuloTEXTO).shouldBeFalse()
     }
     it("Modulo Texto"){
@@ -92,7 +91,5 @@ class ServidorWebTest : DescribeSpec({
       respuesta.pedido shouldBe pedidoConModuloNOT_FOUND
     }
   }
-
-  //ANALIZADORES
 
 })

@@ -1,6 +1,6 @@
 package ar.edu.unahur.obj2.servidorWeb
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 import kotlin.properties.Delegates
 
 // Para no tener los códigos "tirados por ahí", usamos un enum que le da el nombre que corresponde a cada código
@@ -11,15 +11,29 @@ enum class CodigoHttp(val codigo: Int) {
     NOT_FOUND(404),
 }
 
-class Pedido(val ip: String, val url: String, val fechaHora: LocalDateTime) {
+class Pedido(val ip: String, val url: String, val fechaHora: LocalDate) {
     val protocolo = url.takeWhile { it.isLetter() }
     val ruta = "/" + url.split("://").last().substringAfter("/")
     val extension = url.takeLastWhile { it.isLetter() }
+
+    fun moduloSegunPedido(): Modulo {
+        var moduloElegido = ServidorWeb.modulos.find { it.puedeResponder(this) }
+        if (ServidorWeb.validacionProtocolo(this) == CodigoHttp.NOT_IMPLEMENTED.codigo){
+            moduloElegido = SinModulo
+        }
+        else if(moduloElegido == null) {
+            moduloElegido = SinModulo
+        }
+        return moduloElegido
+    }
+
 }
 
 open class Respuesta(val codigo: CodigoHttp, val body: String, val tiempo: Int, val pedido: Pedido){
     fun respuestaDemorada(demoraMinima: Int) = tiempo > demoraMinima
     fun compararIP(ip: String) = pedido.ip == ip
+    fun compararRuta(ruta: String) = pedido.ruta == ruta //Para AnalizadorIPsospechosas
+    fun fueAtendidoEntreHoras(hora1: LocalDate,hora2: LocalDate) = pedido.fechaHora in (hora1..hora2)
 }
 
 object ServidorWeb{
@@ -27,18 +41,19 @@ object ServidorWeb{
     //val pedidos = mutableListOf<Pedido>()
 
     fun validacionProtocolo(pedido: Pedido) =
-        if (pedido.protocolo == "http") CodigoHttp.OK
-        else CodigoHttp.NOT_IMPLEMENTED
+        if (pedido.protocolo == "http") CodigoHttp.OK.codigo
+        else CodigoHttp.NOT_IMPLEMENTED.codigo
+
 
     fun darRespuesta(pedido: Pedido): Respuesta {
-        if (validacionProtocolo(pedido) == CodigoHttp.NOT_IMPLEMENTED) {
+        if (validacionProtocolo(pedido) == CodigoHttp.NOT_IMPLEMENTED.codigo) {
             val RespuestaNOT_IMPLEMENTED = Respuesta(CodigoHttp.NOT_IMPLEMENTED, "", 10, pedido)
             return RespuestaNOT_IMPLEMENTED
         }
         else {
-            val modulo = moduloSegunPedido(pedido)
+            val modulo = pedido.moduloSegunPedido()
 
-            if (modulo != ModuloSinExtensiones){
+            if (modulo != SinModulo){
                 val RespuestaOK = Respuesta(CodigoHttp.OK, modulo.body, modulo.tiempoRespuesta, pedido)
                 return RespuestaOK
             }
@@ -50,16 +65,6 @@ object ServidorWeb{
         }
     }
 
-    fun moduloSegunPedido(pedido: Pedido) : Modulo {
-        var moduloElegido = modulos.find { it.puedeResponder(pedido) }
-        if (validacionProtocolo(pedido) == CodigoHttp.NOT_IMPLEMENTED){
-            moduloElegido = ModuloSinProtocolo
-        }
-        else if(moduloElegido == null) {
-            moduloElegido = ModuloSinExtensiones
-        }
-        return moduloElegido
-    }
     //Analizadores
     var analizadores = mutableListOf<Analizador>()
 

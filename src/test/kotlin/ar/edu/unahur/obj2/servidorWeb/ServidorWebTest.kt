@@ -24,16 +24,27 @@ class ServidorWebTest : DescribeSpec({
   val pedidoConModuloNOT_FOUND = Pedido("207.46.13.8","http://pepite.com.ar/documentos/doc1.pdf",fecha)
 
   //Modulos
-  ModuloTexto.body = "algo"
+  ModuloTexto.body = "texto"
   ModuloTexto.tiempoRespuesta = 10
 
-  ModuloVideo.body = "algo"
+  ModuloVideo.body = "video"
   ModuloVideo.tiempoRespuesta = 10
 
-  ModuloImagen.body = "algo"
-  ModuloImagen.tiempoRespuesta = 10
+  ModuloImagen.body = "imagen"
+  ModuloImagen.tiempoRespuesta = 20
 
 
+  describe("url Pedido"){
+    it("protoclo"){
+      pedidoOK.protocolo shouldBe "http"
+    }
+    it("ruta"){
+      pedidoOK.ruta shouldBe "/documentos/doc1.html"
+    }
+    it("extension"){
+      pedidoOK.extension shouldBe "html"
+    }
+  }
 
   describe("Un servidor web sin modulos") {
     it("con protocolo correcto"){
@@ -69,8 +80,8 @@ class ServidorWebTest : DescribeSpec({
     it("Respuesta OK") {
       val respuesta = ServidorWeb.darRespuesta(pedidoConModuloOK)
       respuesta.codigo shouldBe CodigoHttp.OK
-      respuesta.body shouldBe "algo"
-      respuesta.tiempo shouldBe 10
+      respuesta.body shouldBe "imagen"
+      respuesta.tiempo shouldBe 20
       respuesta.pedido shouldBe pedidoConModuloOK
     }
     it("Respuesta NOT_FOUND") {
@@ -81,5 +92,7 @@ class ServidorWebTest : DescribeSpec({
       respuesta.pedido shouldBe pedidoConModuloNOT_FOUND
     }
   }
+
+  //ANALIZADORES
 
 })

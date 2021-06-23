@@ -14,7 +14,7 @@ enum class CodigoHttp(val codigo: Int) {
 class Pedido(val ip: String, val url: String, val fechaHora: LocalDate) {
     val protocolo = url.takeWhile { it.isLetter() }
     val ruta = "/" + url.split("://").last().substringAfter("/")
-    val extension = url.takeLastWhile { it.isLetter() }
+    val extension = url.split(".").last()
 
     fun moduloSegunPedido(): Modulo {
         var moduloElegido = ServidorWeb.modulos.find { it.puedeResponder(this) }
